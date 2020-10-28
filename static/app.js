@@ -9,7 +9,9 @@ todoList.addEventListener("click", deleteCheck);
 filterOption.addEventListener('click', filterTodo);
 
 function addTodo(event){
+
     event.preventDefault();
+
     const todoDiv = document.createElement('div');
     todoDiv.classList.add("todo");
     const newTodo = document.createElement('li');
@@ -32,6 +34,7 @@ function addTodo(event){
 
 function deleteCheck(event){
     const item = event.target;
+    console.log(item.classList[0]);
     if(item.classList[0] === 'delete-button'){
         const todo = item.parentElement;
         todo.classList.add("fall");
@@ -49,6 +52,7 @@ function deleteCheck(event){
 
 function filterTodo(event){
     const todos = todoList.childNodes;
+    
     todos.forEach(function(todo){
         console.log(event.target.value);
         switch(event.target.value){
