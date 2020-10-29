@@ -1,12 +1,16 @@
 const todoInput = document.querySelector('.todo');
+const horario = document.querySelector('.todo-clock');
 const todoButton = document.querySelector('.boton');
+const micButton = document.querySelector('.vozboton');
 const todoList = document.querySelector('.todo-list');
 const filterOption = document.querySelector('.filter-todo');
+let lang = 'es-MX';
 
 document.addEventListener('DOMContentLoaded', getTodos);
 todoButton.addEventListener('click', addTodo);
 todoList.addEventListener("click", deleteCheck);
 filterOption.addEventListener('click', filterTodo);
+micButton.addEventListener('click', voicerecognition);
 
 function addTodo(event){
 
@@ -14,20 +18,34 @@ function addTodo(event){
 
     const todoDiv = document.createElement('div');
     todoDiv.classList.add("todo");
+
     const newTodo = document.createElement('li');
     newTodo.innerText = todoInput.value;
     newTodo.classList.add("todo-item");
     todoDiv.appendChild(newTodo);
+
+    const time = document.createElement('li');
+    time.innerText = horario.value;
+    time.classList.add("time-item");
+    todoDiv.appendChild(time);
+
     const completedButton = document.createElement('button');
     completedButton.innerHTML = '<i class="fas fa-check-circle"></i>';
     completedButton.classList.add("complete-button");
     todoDiv.appendChild(completedButton)
+
     const deleteButton = document.createElement('button');
     deleteButton.innerHTML = '<i class="fas fa-minus-circle"></i>';
     deleteButton.classList.add("delete-button");
     todoDiv.appendChild(deleteButton);
+
     todoList.appendChild(todoDiv);
-    saveLocalTodos(todoInput.value);
+
+    saveLocalTodos(todoInput.value, horario.value);
+
+
+    //SPEECH
+    TTS(todoInput.value);
 
     todoInput.value = "";
 }
@@ -52,7 +70,7 @@ function deleteCheck(event){
 
 function filterTodo(event){
     const todos = todoList.childNodes;
-    
+
     todos.forEach(function(todo){
         console.log(event.target.value);
         switch(event.target.value){
@@ -79,39 +97,56 @@ function filterTodo(event){
     });
 }
 
-function saveLocalTodos(todo){ 
+function saveLocalTodos(todo, horario){ 
     let todos;
     if(localStorage.getItem('todos') === null){
         todos = [];
     }else{
         todos = JSON.parse(localStorage.getItem('todos'));
     }
-    todos.push(todo);
+    todos.push(todo + "@@" + horario);
     localStorage.setItem('todos', JSON.stringify(todos));
 }
 
 function getTodos(){
     let todos;
+    let text;
+    let hora;
     if(localStorage.getItem('todos') === null){
         todos = [];
     }else{
         todos = JSON.parse(localStorage.getItem('todos'));
     }
     todos.forEach(function(todo){
+        text = todo.slice(0, todo.indexOf("@"));
+        console.log(text);
+        hora = todo.slice(todo.indexOf("@") + 2, todo.length);
+        console.log(hora);
+
         const todoDiv = document.createElement('div');
         todoDiv.classList.add("todo");
+
         const newTodo = document.createElement('li');
-        newTodo.innerText = todo;
+        newTodo.innerText = text;
         newTodo.classList.add("todo-item");
         todoDiv.appendChild(newTodo);
+
+        const time = document.createElement('li');
+        if(hora != "undefined")
+            time.innerText = hora;
+        time.classList.add("time-item");
+        todoDiv.appendChild(time);
+
         const completedButton = document.createElement('button');
         completedButton.innerHTML = '<i class="fas fa-check-circle"></i>';
         completedButton.classList.add("complete-button");
         todoDiv.appendChild(completedButton)
+
         const deleteButton = document.createElement('button');
         deleteButton.innerHTML = '<i class="fas fa-minus-circle"></i>';
         deleteButton.classList.add("delete-button");
         todoDiv.appendChild(deleteButton);
+
         todoList.appendChild(todoDiv);
     });
 }
@@ -126,4 +161,46 @@ function removeLocalTodos(todo){
     const todoIndex = todo.children[0].innerText;
     todos.splice(todos.indexOf(todoIndex), 1);
     localStorage.setItem('todos', JSON.stringify(todos));
+}
+
+function voicerecognition(event){
+    event.preventDefault();
+
+    let speechRec = new p5.SpeechRec(lang, gotSpeech);
+    speechRec.start();
+
+    function gotSpeech(){
+        if(speechRec.resultValue){
+            writeSpeech(speechRec.resultString);
+        }
+    }
+}
+
+function writeSpeech(result){
+    const todoDiv = document.createElement('div');
+    todoDiv.classList.add("todo");
+    const newTodo = document.createElement('li');
+    newTodo.innerText = result;
+    newTodo.classList.add("todo-item");
+    todoDiv.appendChild(newTodo);
+    const completedButton = document.createElement('button');
+    completedButton.innerHTML = '<i class="fas fa-check-circle"></i>';
+    completedButton.classList.add("complete-button");
+    todoDiv.appendChild(completedButton)
+    const deleteButton = document.createElement('button');
+    deleteButton.innerHTML = '<i class="fas fa-minus-circle"></i>';
+    deleteButton.classList.add("delete-button");
+    todoDiv.appendChild(deleteButton);
+    todoList.appendChild(todoDiv);
+    saveLocalTodos(result);
+
+    TTS(result);
+}
+
+function TTS(palabra){
+    console.log(palabra);
+    let speech = new p5.Speech();
+    if (document.getElementById("checkvoice").checked){
+        speech.speak(palabra);
+    }
 }

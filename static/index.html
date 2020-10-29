@@ -16,6 +16,9 @@
     </header>
 
     <form>
+        <button id="voz" class="vozboton">
+            <i class="fas fa-microphone"></i>
+        </button>
         <input type="text" class="todo">
         <input type="time" class="todo-clock" name="appt">
         <button class="boton" type="submit">
@@ -28,6 +31,8 @@
                 <option value="uncompleted">No completadas</option>
             </select>
         </div>
+        <input type="checkbox" id="checkvoice">
+            <label for="checkvoice"> TTS</label><br>
     </form>
 
     <div class="tareas">
@@ -35,6 +40,9 @@
     </div>
     
     <script src="./app.js"></script>
+    <script src="libraries/p5.js"></script>
+    <script src="libraries/p5.sound.js"></script>
+    <script src="libraries/p5.speech.js"></script>
 
 </body>
 </html>
