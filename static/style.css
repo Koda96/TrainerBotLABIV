@@ -91,6 +91,7 @@ form button:hover{
 
 .time-item{
     font-size: 1rem;
+    align-items: center;
 }
 
 .complete-button {

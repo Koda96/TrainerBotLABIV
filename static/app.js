@@ -4,6 +4,7 @@ const todoButton = document.querySelector('.boton');
 const micButton = document.querySelector('.vozboton');
 const todoList = document.querySelector('.todo-list');
 const filterOption = document.querySelector('.filter-todo');
+const digits_only = string => [...string].every(c => '0123456789:'.includes(c));
 let lang = 'es-MX';
 
 document.addEventListener('DOMContentLoaded', getTodos);
@@ -45,9 +46,10 @@ function addTodo(event){
 
 
     //SPEECH
-    TTS(todoInput.value);
+    TTS(todoInput.value, horario.value);
 
     todoInput.value = "";
+    horario.value = "";
 }
 
 function deleteCheck(event){
@@ -119,9 +121,7 @@ function getTodos(){
     }
     todos.forEach(function(todo){
         text = todo.slice(0, todo.indexOf("@"));
-        console.log(text);
         hora = todo.slice(todo.indexOf("@") + 2, todo.length);
-        console.log(hora);
 
         const todoDiv = document.createElement('div');
         todoDiv.classList.add("todo");
@@ -166,23 +166,41 @@ function removeLocalTodos(todo){
 function voicerecognition(event){
     event.preventDefault();
 
+    let text;
+    let hora;
     let speechRec = new p5.SpeechRec(lang, gotSpeech);
     speechRec.start();
 
     function gotSpeech(){
         if(speechRec.resultValue){
-            writeSpeech(speechRec.resultString);
+            text = speechRec.resultString.slice(0, speechRec.resultString.indexOf("a las"));
+            hora = speechRec.resultString.slice(speechRec.resultString.lastIndexOf("a las")+6, speechRec.resultString.length);
+            var isValid = /^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$/.test(hora);
+
+            if(speechRec.resultString.includes("a las") && isValid){
+                writeSpeech(text, hora);
+            }
+            else{
+                writeSpeech(speechRec.resultString,"undefined");
+            }
         }
     }
 }
 
-function writeSpeech(result){
+function writeSpeech(text, hora){
     const todoDiv = document.createElement('div');
     todoDiv.classList.add("todo");
     const newTodo = document.createElement('li');
-    newTodo.innerText = result;
+    newTodo.innerText = text;
     newTodo.classList.add("todo-item");
     todoDiv.appendChild(newTodo);
+    const time = document.createElement('li');
+
+    if(hora != "undefined")
+        time.innerText = hora;
+    
+    time.classList.add("time-item");
+    todoDiv.appendChild(time);
     const completedButton = document.createElement('button');
     completedButton.innerHTML = '<i class="fas fa-check-circle"></i>';
     completedButton.classList.add("complete-button");
@@ -192,15 +210,19 @@ function writeSpeech(result){
     deleteButton.classList.add("delete-button");
     todoDiv.appendChild(deleteButton);
     todoList.appendChild(todoDiv);
-    saveLocalTodos(result);
+    saveLocalTodos(text, hora);
 
-    TTS(result);
+    TTS(text, hora);
 }
 
-function TTS(palabra){
-    console.log(palabra);
+function TTS(palabra, hora){
+    var isValid = /^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$/.test(hora);
     let speech = new p5.Speech();
+
     if (document.getElementById("checkvoice").checked){
-        speech.speak(palabra);
+        if(isValid)
+            speech.speak(palabra + "a las" + hora + " minutos.");
+        else
+            speech.speak(palabra);
     }
 }
