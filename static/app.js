@@ -12,6 +12,7 @@ todoButton.addEventListener('click', addTodo);
 todoList.addEventListener("click", deleteCheck);
 filterOption.addEventListener('click', filterTodo);
 micButton.addEventListener('click', voicerecognition);
+document.addEventListener('click', startAudio);
 
 function addTodo(event){
 
@@ -154,6 +155,7 @@ function getTodos(){
     let speechRec = new p5.SpeechRec(lang, gotSpeech);
     speechRec.continuous = true;
     speechRec.start();
+    console.log("Listening");
 
     function gotSpeech(){
         gotSpeech3(speechRec);
@@ -174,7 +176,6 @@ function removeLocalTodos(todo){
 
 function voicerecognition(event){
     let speechRec = new p5.SpeechRec(lang, gotSpeech2);
-    console.log(event);
 
     if(event)
         event.preventDefault();
@@ -182,6 +183,7 @@ function voicerecognition(event){
     let text;
     let hora;
     speechRec.start();
+    console.log("Listening");
 
     function gotSpeech2(){
         if(speechRec.resultValue){
@@ -200,6 +202,8 @@ function voicerecognition(event){
 }
 
 function writeSpeech(text, hora){
+
+    console.log("Writing");
 
     const todoDiv = document.createElement('div');
     todoDiv.classList.add("todo");
@@ -225,11 +229,14 @@ function writeSpeech(text, hora){
     todoList.appendChild(todoDiv);
     saveLocalTodos(text, hora);
 
+    console.log("Writing succesful");
+
     TTS(text, hora);
 
     let speechRec = new p5.SpeechRec(lang, gotSpeech);
     speechRec.continuous = true;
     speechRec.start();
+    console.log("Listening");
 
     function gotSpeech(){
         gotSpeech3(speechRec);
@@ -243,12 +250,20 @@ function TTS(palabra, hora){
     if(palabra === "Escribiendo" || palabra === "Hablando")
         document.getElementById("checkvoice").checked = true;
 
+    console.log("Talking");
+    
     if (document.getElementById("checkvoice").checked){
         if(isValid && hora != "undefined")
             speech.speak(palabra + "a las" + hora + " minutos.");
         else
             speech.speak(palabra);
     }
+}
+
+function startAudio(){
+    let audio = new AudioContext();
+    console.log("Audio loaded and resumed")
+    audio.resume();
 }
 
 function gotSpeech3(speechRec){
