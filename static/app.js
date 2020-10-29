@@ -44,6 +44,8 @@ function addTodo(event){
 
     saveLocalTodos(todoInput.value, horario.value);
 
+    console.log(todoList);
+
 
     //SPEECH
     TTS(todoInput.value, horario.value);
@@ -54,7 +56,6 @@ function addTodo(event){
 
 function deleteCheck(event){
     const item = event.target;
-    console.log(item.classList[0]);
     if(item.classList[0] === 'delete-button'){
         const todo = item.parentElement;
         todo.classList.add("fall");
@@ -74,7 +75,6 @@ function filterTodo(event){
     const todos = todoList.childNodes;
 
     todos.forEach(function(todo){
-        console.log(event.target.value);
         switch(event.target.value){
             case "all":
                 todo.style.display = 'flex';
@@ -114,6 +114,7 @@ function getTodos(){
     let todos;
     let text;
     let hora;
+
     if(localStorage.getItem('todos') === null){
         todos = [];
     }else{
@@ -149,6 +150,14 @@ function getTodos(){
 
         todoList.appendChild(todoDiv);
     });
+
+    let speechRec = new p5.SpeechRec(lang, gotSpeech);
+    speechRec.continuous = true;
+    speechRec.start();
+
+    function gotSpeech(){
+        gotSpeech3(speechRec);
+    }
 }
 
 function removeLocalTodos(todo){
@@ -164,14 +173,17 @@ function removeLocalTodos(todo){
 }
 
 function voicerecognition(event){
-    event.preventDefault();
+    let speechRec = new p5.SpeechRec(lang, gotSpeech2);
+    console.log(event);
+
+    if(event)
+        event.preventDefault();
 
     let text;
     let hora;
-    let speechRec = new p5.SpeechRec(lang, gotSpeech);
     speechRec.start();
 
-    function gotSpeech(){
+    function gotSpeech2(){
         if(speechRec.resultValue){
             text = speechRec.resultString.slice(0, speechRec.resultString.indexOf("a las"));
             hora = speechRec.resultString.slice(speechRec.resultString.lastIndexOf("a las")+6, speechRec.resultString.length);
@@ -188,6 +200,7 @@ function voicerecognition(event){
 }
 
 function writeSpeech(text, hora){
+
     const todoDiv = document.createElement('div');
     todoDiv.classList.add("todo");
     const newTodo = document.createElement('li');
@@ -213,16 +226,40 @@ function writeSpeech(text, hora){
     saveLocalTodos(text, hora);
 
     TTS(text, hora);
+
+    let speechRec = new p5.SpeechRec(lang, gotSpeech);
+    speechRec.continuous = true;
+    speechRec.start();
+
+    function gotSpeech(){
+        gotSpeech3(speechRec);
+    }
 }
 
 function TTS(palabra, hora){
     var isValid = /^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$/.test(hora);
     let speech = new p5.Speech();
 
+    if(palabra === "Escribiendo" || palabra === "Hablando")
+        document.getElementById("checkvoice").checked = true;
+
     if (document.getElementById("checkvoice").checked){
-        if(isValid)
+        if(isValid && hora != "undefined")
             speech.speak(palabra + "a las" + hora + " minutos.");
         else
             speech.speak(palabra);
+    }
+}
+
+function gotSpeech3(speechRec){
+    console.log(speechRec.resultString);
+    if(speechRec.resultString === "Escribir" || speechRec.resultString === "escribir"){
+        TTS("Escribiendo","undefined");
+        voicerecognition();
+    }
+    
+    if(speechRec.resultString === "Hablar" || speechRec.resultString === "hablar"){
+        TTS("Hablando","undefined");
+        document.getElementById("checkvoice").checked = true;
     }
 }
