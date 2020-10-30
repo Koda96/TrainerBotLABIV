@@ -1,3 +1,4 @@
+//DEFINICIONES
 const todoInput = document.querySelector('.todo');
 const horario = document.querySelector('.todo-clock');
 const todoButton = document.querySelector('.boton');
@@ -7,6 +8,7 @@ const filterOption = document.querySelector('.filter-todo');
 const digits_only = string => [...string].every(c => '0123456789:'.includes(c));
 let lang = 'es-MX';
 
+//LISTENERS
 document.addEventListener('DOMContentLoaded', getTodos);
 todoButton.addEventListener('click', addTodo);
 todoList.addEventListener("click", deleteCheck);
@@ -16,16 +18,20 @@ document.addEventListener('click', startAudio);
 
 function addTodo(event){
 
+    //FUNCION PARA QUE NO REFRESHEE LA PAGINA APENAS DAS EL BOTON
     event.preventDefault();
 
+    //CREACION DE LA TAREA
     const todoDiv = document.createElement('div');
     todoDiv.classList.add("todo");
 
+    //SE CREA EL TEXTO EN UN LI 
     const newTodo = document.createElement('li');
     newTodo.innerText = todoInput.value;
     newTodo.classList.add("todo-item");
     todoDiv.appendChild(newTodo);
 
+    //SE USA EL TIME QUE VIENE DEL TIME-ITEM
     const time = document.createElement('li');
     time.innerText = horario.value;
     time.classList.add("time-item");
@@ -204,17 +210,16 @@ function voicerecognition(event){
 function writeSpeech(text, hora){
 
     console.log("Writing");
-
     const todoDiv = document.createElement('div');
     todoDiv.classList.add("todo");
     const newTodo = document.createElement('li');
-    newTodo.innerText = text;
+    newTodo.innerText = text; //SE UTILIZA EL STRING TEXT RECIBIDO POR LA FUNCION VOICERECOGNITION
     newTodo.classList.add("todo-item");
     todoDiv.appendChild(newTodo);
     const time = document.createElement('li');
 
     if(hora != "undefined")
-        time.innerText = hora;
+        time.innerText = hora; //SE UTILIZA EL STRING HORA RECIBIDO POR LA FUNCION VOICERECOGNITION
     
     time.classList.add("time-item");
     todoDiv.appendChild(time);
@@ -244,9 +249,14 @@ function writeSpeech(text, hora){
 }
 
 function TTS(palabra, hora){
+
+    //VALIDACION DE HORA PARA MANTENER INTEGRIDAD
     var isValid = /^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$/.test(hora);
     let speech = new p5.Speech();
 
+
+    //INPUT DE VOZ PARA INTERACTUAR CON EL FORMULARIO, SI SE DICE ESCRIBIR SE VA A CREAR UN LI EN EL LISTADO DE TODO, SI SE DICE
+    //HABLAR, SE ACTIVA LA FUNCION TTS, LA FUNCION TTS SE ACTIVA POR DEFECTO SI SE DICE ESCRIBIR.
     if(palabra === "Escribiendo" || palabra === "Hablando")
         document.getElementById("checkvoice").checked = true;
 
@@ -261,6 +271,8 @@ function TTS(palabra, hora){
 }
 
 function startAudio(){
+    //FUNCION PARA CUMPLIR LA POLITICA DE NAVEGADOR CHROME p5.sound.js:175 The AudioContext was not allowed to start.
+    //It must be resumed (or created) after a user gesture on the page. https://goo.gl/7K7WLu
     let audio = new AudioContext();
     console.log("Audio loaded and resumed")
     audio.resume();
